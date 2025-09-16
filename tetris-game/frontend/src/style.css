@@ -5,13 +5,86 @@ body {
   margin: 0;
   padding: 0;
 }
+
+.game-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  margin: 20px auto;
+  max-width: 800px;
+}
+
+.controls-panel {
+  background: #333;
+  border: 2px solid #555;
+  border-radius: 10px;
+  padding: 20px;
+  width: 200px;
+  text-align: left;
+}
+
+.controls-panel h3 {
+  margin: 0 0 15px 0;
+  color: #4CAF50;
+  text-align: center;
+}
+
+.control-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+  padding: 5px 0;
+}
+
+.key {
+  background: #555;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-weight: bold;
+  min-width: 35px;
+  text-align: center;
+  border: 1px solid #777;
+}
+
+.action {
+  color: #ddd;
+  font-size: 14px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  padding: 3px 0;
+}
+
+.label {
+  color: #aaa;
+  font-size: 13px;
+}
+
+.value {
+  color: #fff;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.game-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .tetris-board {
   display: grid;
   grid-template-rows: repeat(20, 20px);
   grid-template-columns: repeat(10, 20px);
   gap: 1px;
   background: #333;
-  margin: 20px auto;
   width: 202px;
   border: 2px solid #fff;
 }
@@ -20,10 +93,181 @@ body {
   height: 20px;
   background: #444;
 }
-.cell.active {
-  background: #0ff;
+
+/* Colors for different Tetris pieces */
+.cell.color-0 {
+  background: #444; /* Empty cell */
 }
+.cell.color-1 {
+  background: #00ffff; /* I piece - Cyan */
+}
+.cell.color-2 {
+  background: #ffff00; /* O piece - Yellow */
+}
+.cell.color-3 {
+  background: #800080; /* T piece - Purple */
+}
+.cell.color-4 {
+  background: #0000ff; /* J piece - Blue */
+}
+.cell.color-5 {
+  background: #ffa500; /* L piece - Orange */
+}
+.cell.color-6 {
+  background: #00ff00; /* S piece - Green */
+}
+.cell.color-7 {
+  background: #ff0000; /* Z piece - Red */
+}
+
 .score {
   text-align: center;
   margin-top: 10px;
+}
+
+.restart-button {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.restart-button:hover {
+  background: #45a049;
+}
+
+/* Fireworks animation */
+.fireworks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.firework {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  border-radius: 50%;
+  animation: firework 2s ease-out infinite;
+}
+
+.firework:nth-child(1) {
+  left: 10%;
+  top: 20%;
+  animation-delay: 0s;
+  background: #ff6b6b;
+}
+
+.firework:nth-child(2) {
+  left: 25%;
+  top: 40%;
+  animation-delay: 0.2s;
+  background: #4ecdc4;
+}
+
+.firework:nth-child(3) {
+  left: 40%;
+  top: 15%;
+  animation-delay: 0.4s;
+  background: #ffe66d;
+}
+
+.firework:nth-child(4) {
+  left: 55%;
+  top: 35%;
+  animation-delay: 0.6s;
+  background: #ff8b94;
+}
+
+.firework:nth-child(5) {
+  left: 70%;
+  top: 25%;
+  animation-delay: 0.8s;
+  background: #95e1d3;
+}
+
+.firework:nth-child(6) {
+  left: 85%;
+  top: 45%;
+  animation-delay: 1.0s;
+  background: #ffa8a8;
+}
+
+.firework:nth-child(7) {
+  left: 15%;
+  top: 60%;
+  animation-delay: 0.3s;
+  background: #74b9ff;
+}
+
+.firework:nth-child(8) {
+  left: 35%;
+  top: 65%;
+  animation-delay: 0.7s;
+  background: #fd79a8;
+}
+
+.firework:nth-child(9) {
+  left: 60%;
+  top: 55%;
+  animation-delay: 1.1s;
+  background: #fdcb6e;
+}
+
+.firework:nth-child(10) {
+  left: 80%;
+  top: 70%;
+  animation-delay: 0.5s;
+  background: #e17055;
+}
+
+.firework:nth-child(11) {
+  left: 20%;
+  top: 80%;
+  animation-delay: 0.9s;
+  background: #a29bfe;
+}
+
+.firework:nth-child(12) {
+  left: 75%;
+  top: 10%;
+  animation-delay: 1.3s;
+  background: #00b894;
+}
+
+@keyframes firework {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  25% {
+    transform: scale(1) rotate(90deg);
+    opacity: 1;
+    box-shadow: 0 0 10px 5px currentColor;
+  }
+  50% {
+    transform: scale(2) rotate(180deg);
+    opacity: 0.8;
+    box-shadow: 0 0 20px 10px currentColor;
+  }
+  75% {
+    transform: scale(3) rotate(270deg);
+    opacity: 0.6;
+    box-shadow: 0 0 30px 15px currentColor;
+  }
+  100% {
+    transform: scale(4) rotate(360deg);
+    opacity: 0;
+    box-shadow: 0 0 40px 20px currentColor;
+  }
 }
