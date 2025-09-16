@@ -1,0 +1,13 @@
+{
+    "name": "tetris-frontend",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
+    },
+    "scripts": {
+        "start": "webpack serve --mode development --open",
+        "build": "webpack --mode production"
+    }
+}
