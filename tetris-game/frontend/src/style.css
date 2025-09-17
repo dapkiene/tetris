@@ -118,6 +118,22 @@ body {
   background: #45a049;
 }
 
+.sound-toggle {
+  background: #2196F3;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.3s;
+  margin-right: 10px;
+}
+
+.sound-toggle:hover {
+  background: #1976D2;
+}
+
 .game-header {
   margin-bottom: 10px;
 }
@@ -283,32 +299,84 @@ body {
   width: 20px;
   height: 20px;
   background: #444;
+  border: 1px solid #222;
+  box-sizing: border-box;
 }
 
-/* Colors for different Tetris pieces */
+/* Colors for different Tetris pieces with 3D effects */
 .cell.color-0 {
   background: #444; /* Empty cell */
+  border: 1px solid #333;
 }
+
 .cell.color-1 {
-  background: #00ffff; /* I piece - Cyan */
+  /* I piece - Cyan with 3D effect */
+  background: linear-gradient(135deg, #00ffff 0%, #00e6e6 50%, #00cccc 100%);
+  border: 1px solid #00aaaa;
+  box-shadow: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 .cell.color-2 {
-  background: #ffff00; /* O piece - Yellow */
+  /* O piece - Yellow with 3D effect */
+  background: linear-gradient(135deg, #ffff00 0%, #e6e600 50%, #cccc00 100%);
+  border: 1px solid #aaaa00;
+  box-shadow: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 .cell.color-3 {
-  background: #800080; /* T piece - Purple */
+  /* T piece - Purple with 3D effect */
+  background: linear-gradient(135deg, #800080 0%, #730073 50%, #660066 100%);
+  border: 1px solid #550055;
+  box-shadow: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 .cell.color-4 {
-  background: #0000ff; /* J piece - Blue */
+  /* J piece - Blue with 3D effect */
+  background: linear-gradient(135deg, #0000ff 0%, #0000e6 50%, #0000cc 100%);
+  border: 1px solid #0000aa;
+  box-shadow: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 .cell.color-5 {
-  background: #ffa500; /* L piece - Orange */
+  /* L piece - Orange with 3D effect */
+  background: linear-gradient(135deg, #ffa500 0%, #e69500 50%, #cc8400 100%);
+  border: 1px solid #b37300;
+  box-shadow: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 .cell.color-6 {
-  background: #00ff00; /* S piece - Green */
+  /* S piece - Green with 3D effect */
+  background: linear-gradient(135deg, #00ff00 0%, #00e600 50%, #00cc00 100%);
+  border: 1px solid #00aa00;
+  box-shadow: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 .cell.color-7 {
-  background: #ff0000; /* Z piece - Red */
+  /* Z piece - Red with 3D effect */
+  background: linear-gradient(135deg, #ff0000 0%, #e60000 50%, #cc0000 100%);
+  border: 1px solid #aa0000;
+  box-shadow: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .score {

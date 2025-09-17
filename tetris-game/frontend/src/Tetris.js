@@ -1,5 +1,37 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
+// New audio system using downloadable sound files
+let soundEnabled = true; // Global sound toggle
+
+const playAnimalSound = (animalType) => {
+    if (!soundEnabled) return;
+
+    const soundMap = {
+        1: '/audio/elephant.mp3',  // I-piece: Elephant trumpet
+        2: '/audio/duck.mp3',      // O-piece: Duck quack
+        3: '/audio/cat.mp3',       // T-piece: Cat meow
+        4: '/audio/dog.mp3',       // J-piece: Dog bark
+        5: '/audio/lion.mp3',      // L-piece: Lion roar
+        6: '/audio/bird.mp3',      // S-piece: Bird chirp
+        7: '/audio/frog.mp3'       // Z-piece: Frog ribbit
+    };
+
+    const audioFile = soundMap[animalType];
+    if (audioFile) {
+        const audio = new Audio(audioFile);
+        audio.volume = 0.3; // Set moderate volume
+        audio.play().catch(error => {
+            console.log('Audio file not found or failed to play:', audioFile);
+            console.log('Please download animal sound files as described in /public/audio/README.md');
+        });
+    }
+};
+
+const toggleSound = () => {
+    soundEnabled = !soundEnabled;
+    return soundEnabled;
+};
+
 const ROWS = 20;
 const COLS = 10;
 const SHAPES = [
@@ -44,6 +76,12 @@ function Tetris() {
     const [showNicknameInput, setShowNicknameInput] = useState(false);
     const [highScores, setHighScores] = useState([]);
     const [userBestScore, setUserBestScore] = useState(0);
+    const [soundOn, setSoundOn] = useState(true);
+
+    const handleSoundToggle = () => {
+        const newSoundState = toggleSound();
+        setSoundOn(newSoundState);
+    };
 
     const getFallSpeed = useCallback(() => {
         return Math.max(100, 500 - Math.floor(score / 100) * 50);
@@ -170,6 +208,9 @@ function Tetris() {
             if (isValid(board, currentPiece, nextPos)) {
                 setPos(nextPos);
             } else {
+                // Play animal sound when block hits the floor
+                playAnimalSound(currentPiece.color);
+
                 const newBoard = mergeShape(board, currentPiece, pos);
                 // Check for completed lines
                 let lines = 0;
@@ -277,6 +318,14 @@ function Tetris() {
                         <span className="action">Rotate</span>
                     </div>
 
+                    <h3>🔊 Sound</h3>
+                    <div className="control-item">
+                        <button onClick={handleSoundToggle} className="sound-toggle">
+                            {soundOn ? '🔊 Sound On' : '🔇 Sound Off'}
+                        </button>
+                        <span className="action">Toggle animal sounds</span>
+                    </div>
+
                     <h3>🎯 Game Info</h3>
                     <div className="info-item">
                         <span className="label">Speed:</span>
@@ -289,6 +338,14 @@ function Tetris() {
                     <div className="info-item">
                         <span className="label">Line Clear:</span>
                         <span className="value">100 points each</span>
+                    </div>
+                    <div className="info-item">
+                        <span className="label">Animal Sounds:</span>
+                        <span className="value">Each piece has its own sound!</span>
+                    </div>
+                    <div className="info-item">
+                        <span className="label">Sound Setup:</span>
+                        <span className="value">Download sounds from /public/audio/</span>
                     </div>
                 </div>
 
