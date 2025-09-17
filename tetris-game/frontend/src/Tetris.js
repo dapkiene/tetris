@@ -39,20 +39,95 @@ function Tetris() {
     const [gameOver, setGameOver] = useState(false);
     const [showFireworks, setShowFireworks] = useState(false);
     const [lastFireworkScore, setLastFireworkScore] = useState(0);
+    const [gameStarted, setGameStarted] = useState(false);
+    const [nickname, setNickname] = useState('');
+    const [showNicknameInput, setShowNicknameInput] = useState(false);
+    const [highScores, setHighScores] = useState([]);
+    const [userBestScore, setUserBestScore] = useState(0);
 
     const getFallSpeed = useCallback(() => {
         return Math.max(100, 500 - Math.floor(score / 100) * 50);
     }, [score]);
 
-    const restartGame = () => {
+    const fetchHighScores = useCallback(async () => {
+        try {
+            const response = await fetch('/api/highscores');
+            const scores = await response.json();
+            setHighScores(scores);
+
+            // Find user's best score
+            const userScores = scores.filter(s => s.name === nickname);
+            const bestScore = userScores.length > 0 ? Math.max(...userScores.map(s => s.score)) : 0;
+            setUserBestScore(bestScore);
+        } catch (error) {
+            console.error('Failed to fetch high scores:', error);
+        }
+    }, [nickname]);
+
+    const saveScore = useCallback(async () => {
+        if (!nickname || score === 0) return;
+
+        try {
+            await fetch('/api/highscores', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: nickname, score }),
+            });
+            fetchHighScores();
+        } catch (error) {
+            console.error('Failed to save score:', error);
+        }
+    }, [nickname, score, fetchHighScores]);
+
+    const startGame = () => {
+        if (!nickname.trim()) {
+            setShowNicknameInput(true);
+            return;
+        }
+        setGameStarted(true);
+        setGameOver(false);
         setBoard(createBoard());
         setCurrentPiece(getRandomShape());
         setPos({ row: 0, col: 3 });
         setScore(0);
+        setShowFireworks(false);
+        setLastFireworkScore(0);
+        fetchHighScores();
+    };
+
+    const restartGame = () => {
+        setGameStarted(false);
         setGameOver(false);
+        setBoard(createBoard());
+        setCurrentPiece(getRandomShape());
+        setPos({ row: 0, col: 3 });
+        setScore(0);
         setShowFireworks(false);
         setLastFireworkScore(0);
     };
+
+    const handleNicknameSubmit = () => {
+        if (nickname.trim()) {
+            setShowNicknameInput(false);
+            startGame();
+        }
+    };
+
+    // Load high scores when component mounts
+    useEffect(() => {
+        const loadInitialScores = async () => {
+            try {
+                const response = await fetch('/api/highscores');
+                const scores = await response.json();
+                setHighScores(scores);
+            } catch (error) {
+                console.error('Failed to fetch initial high scores:', error);
+            }
+        };
+        loadInitialScores();
+    }, []);
 
     const mergeShape = useCallback((b, piece, p) => {
         const newBoard = b.map(row => [...row]);
@@ -88,6 +163,8 @@ function Tetris() {
 
     useEffect(() => {
         if (gameOver) return;
+        if (!gameStarted) return;
+
         const interval = setInterval(() => {
             const nextPos = { row: pos.row + 1, col: pos.col };
             if (isValid(board, currentPiece, nextPos)) {
@@ -120,6 +197,7 @@ function Tetris() {
                 const newPos = { row: 0, col: 3 };
                 if (!isValid(filtered, newPiece, newPos)) {
                     setGameOver(true);
+                    saveScore();
                 } else {
                     setCurrentPiece(newPiece);
                     setPos(newPos);
@@ -127,11 +205,9 @@ function Tetris() {
             }
         }, getFallSpeed());
         return () => clearInterval(interval);
-    }, [board, currentPiece, pos, isValid, mergeShape, gameOver, score, lastFireworkScore, getFallSpeed]);
-
-    useEffect(() => {
+    }, [board, currentPiece, pos, isValid, mergeShape, gameOver, score, lastFireworkScore, getFallSpeed, gameStarted, saveScore]); useEffect(() => {
         const handleKey = (e) => {
-            if (gameOver) return;
+            if (gameOver || !gameStarted) return;
             let nextPos = { ...pos };
             let nextPiece = currentPiece;
             if (e.key === 'ArrowLeft') nextPos.col--;
@@ -148,13 +224,35 @@ function Tetris() {
         };
         window.addEventListener('keydown', handleKey);
         return () => window.removeEventListener('keydown', handleKey);
-    }, [pos, currentPiece, board, isValid, rotate, gameOver]);
+    }, [pos, currentPiece, board, isValid, rotate, gameOver, gameStarted]);
 
     const displayBoard = mergeShape(board, currentPiece, pos);
 
     return (
         <div style={{ textAlign: 'center', position: 'relative' }}>
             <h1>Tetris Game</h1>
+
+            {/* Nickname Input Modal */}
+            {showNicknameInput && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h3>Enter Your Nickname</h3>
+                        <input
+                            type="text"
+                            value={nickname}
+                            onChange={(e) => setNickname(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleNicknameSubmit()}
+                            placeholder="Your nickname..."
+                            maxLength="20"
+                            className="nickname-input"
+                        />
+                        <button onClick={handleNicknameSubmit} className="modal-button">
+                            Start Game
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="game-container">
                 <div className="controls-panel">
                     <h3>🎮 Controls</h3>
@@ -178,7 +276,7 @@ function Tetris() {
                         <span className="key">Ctrl</span>
                         <span className="action">Rotate</span>
                     </div>
-                    
+
                     <h3>🎯 Game Info</h3>
                     <div className="info-item">
                         <span className="label">Speed:</span>
@@ -193,40 +291,85 @@ function Tetris() {
                         <span className="value">100 points each</span>
                     </div>
                 </div>
-                
+
                 <div className="game-area">
-                    <div className="tetris-board">
-                        {displayBoard.map((row, r) =>
-                            row.map((cell, c) => (
-                                <div key={r + '-' + c} className={`cell color-${cell}`} />
-                            ))
-                        )}
-                    </div>
-                    <div className="score">Score: {score}</div>
-                    {gameOver && (
-                        <div style={{ marginTop: '10px' }}>
-                            <div style={{ color: 'red', marginBottom: '10px' }}>Game Over</div>
-                            <button onClick={restartGame} className="restart-button">
-                                Restart Game
+                    {!gameStarted ? (
+                        <div className="start-screen">
+                            <div className="welcome-message">
+                                <h2>Welcome to Tetris!</h2>
+                                {nickname && <p>Hello, <strong>{nickname}</strong>!</p>}
+                                {userBestScore > 0 && <p>Your best score: <strong>{userBestScore}</strong></p>}
+                            </div>
+                            <button onClick={startGame} className="start-button">
+                                {nickname ? 'Start Game' : 'Enter Nickname & Start'}
                             </button>
                         </div>
+                    ) : (
+                        <>
+                            <div className="game-header">
+                                <div className="player-info">
+                                    Player: <strong>{nickname}</strong>
+                                    {userBestScore > 0 && <span className="best-score"> | Best: {userBestScore}</span>}
+                                </div>
+                            </div>
+                            <div className="tetris-board">
+                                {displayBoard.map((row, r) =>
+                                    row.map((cell, c) => (
+                                        <div key={r + '-' + c} className={`cell color-${cell}`} />
+                                    ))
+                                )}
+                            </div>
+                            <div className="score">Score: {score}</div>
+                            {gameOver && (
+                                <div style={{ marginTop: '10px' }}>
+                                    <div style={{ color: 'red', marginBottom: '10px' }}>Game Over</div>
+                                    <div className="game-over-buttons">
+                                        <button onClick={startGame} className="restart-button">
+                                            Play Again
+                                        </button>
+                                        <button onClick={restartGame} className="menu-button">
+                                            Main Menu
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
+
+                <div className="scores-panel">
+                    <h3>🏆 High Scores</h3>
+                    <div className="scores-list">
+                        {highScores.length > 0 ? (
+                            highScores.map((score, index) => (
+                                <div key={index} className={`score-item ${score.name === nickname ? 'current-user' : ''}`}>
+                                    <span className="rank">#{index + 1}</span>
+                                    <span className="name">{score.name}</span>
+                                    <span className="points">{score.score}</span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="no-scores">No scores yet!</div>
+                        )}
+                    </div>
+                </div>
             </div>
+
+            {/* Fireworks positioned around the game area */}
             {showFireworks && (
-                <div className="fireworks">
-                    <div className="firework"></div>
-                    <div className="firework"></div>
-                    <div className="firework"></div>
-                    <div className="firework"></div>
-                    <div className="firework"></div>
-                    <div className="firework"></div>
-                    <div className="firework"></div>
-                    <div className="firework"></div>
-                    <div className="firework"></div>
-                    <div className="firework"></div>
-                    <div className="firework"></div>
-                    <div className="firework"></div>
+                <div className="fireworks-container">
+                    <div className="firework firework-left-1"></div>
+                    <div className="firework firework-left-2"></div>
+                    <div className="firework firework-left-3"></div>
+                    <div className="firework firework-right-1"></div>
+                    <div className="firework firework-right-2"></div>
+                    <div className="firework firework-right-3"></div>
+                    <div className="firework firework-top-1"></div>
+                    <div className="firework firework-top-2"></div>
+                    <div className="firework firework-top-3"></div>
+                    <div className="firework firework-bottom-1"></div>
+                    <div className="firework firework-bottom-2"></div>
+                    <div className="firework firework-bottom-3"></div>
                 </div>
             )}
         </div>
